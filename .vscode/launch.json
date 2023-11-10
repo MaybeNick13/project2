@@ -5,8 +5,8 @@
             "name": "(gdb) Launch",
             "type": "cppdbg",
             "request": "launch",
-            "program": "${workspaceFolder}/cluster", // Replace with your C++ executable's path
-            "args": ["-i", "input.dat", "-c", "config.conf", "-o", "cluster.txt", "-m", "Classic"],
+            "program": "${workspaceFolder}/cube", // Replace with your C++ executable's path
+            "args": [""],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",
             "environment": [],
