@@ -10,8 +10,10 @@ using namespace std;
  int W=150;
  int k = 4;
  int L = 5;
- int N = 1;
- int R = 10000;
+ int N = 50;
+ int E=30;
+ int R = 1;
+ int GraphN = 1;
  int NumImages;
  int ImageSize =784;
  unsigned long M= 4294967291;
@@ -173,7 +175,7 @@ bool compare::operator()(const pair_dist_pos &a, const pair_dist_pos &b) {
             euclidean_distance(array[j], array[query_pos]),
             j
         }; //xrisimopoioume to struct myPair, afti ti fora dinontas sti thesi tou key tin apostasi, gia kaliteri xrisi xorou
-        if (j < N) {
+        if (j < GraphN) {
             distances.push(pair);
 
         } else {

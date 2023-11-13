@@ -14,14 +14,12 @@ extern int W;
 extern int k;
 extern int L;
 extern int N;
+extern int E;
+extern int GraphN;
 extern int R;
 extern int NumImages;
 extern int ImageSize;
 extern unsigned long M;
-extern int ck;
-extern int cM;
-extern int cProbes;
-
 struct kmean_node{
 	int pos;
 	float key;

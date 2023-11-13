@@ -3,9 +3,9 @@
     "configurations": [
         {
             "name": "(gdb) Launch",
-            "type": "cppdbg",
+            "type": "by-gdb",
             "request": "launch",
-            "program": "${workspaceFolder}/cube", // Replace with your C++ executable's path
+            "program": "${workspaceFolder}/lsh", // Replace with your C++ executable's path
             "args": [""],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}",

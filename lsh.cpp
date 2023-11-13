@@ -28,40 +28,15 @@
 
 using namespace std;
 
-int main(int argc, char * argv[]) {
-  string input = "input.dat";
-  string queryF = "query.dat";
+vector<vector<pair_dist_pos>> create_graph(string input, int N) {
   string output = "output.txt";
-  for (int i = 1; i < argc; i++) { //parsing gia ta input variables
-    if (strcmp(argv[i], "-o") == 0) {
-      output = argv[i + 1];
-    }
-    if (strcmp(argv[i], "-d") == 0) {
-      input = argv[i + 1];
-    }
-    if (strcmp(argv[i], "-q") == 0) {
-      queryF = argv[i + 1];
-    }
-    if (strcmp(argv[i], "-k") == 0) {
-      k = std::stoi(argv[i + 1]);
-    }
-    if (strcmp(argv[i], "-L") == 0) {
-      L = std::stoi(argv[i + 1]);
-    }
-    if (strcmp(argv[i], "-N") == 0) {
-      N = std::stoi(argv[i + 1]);
-    }
-    if (strcmp(argv[i], "-R") == 0) {
-      R = std::stoi(argv[i + 1]);
-    }
-  }
-
   ofstream outfile;
   outfile.open(output);
   ifstream images(input);
+  int k = 4;
+  int L = 5;
   if (!images.is_open()) {
     cerr << "Failed to open input.dat" << endl;
-    return 1;
   }
 
   images.seekg(4);
@@ -86,8 +61,7 @@ int main(int argc, char * argv[]) {
   ImageSize = rows * columns;
   bool repeat;
   Node * array = new Node[NumImages];
-  pair_dist_pos * methodResult = new pair_dist_pos[N];
-  for (int i = 0; i < NumImages - 1; i++) {
+  for (int i = 0; i < NumImages; i++) {
     images.read(array[i].image.data(), ImageSize);
   }
     repeat = false;
@@ -95,7 +69,7 @@ int main(int argc, char * argv[]) {
     for (int j = 0; j < L; j++) {
       tables[j] = hashtable(j, & array); //arxikopiisi ton hashtables
     }
-
+    vector<vector<pair_dist_pos>> graph (NumImages,vector<pair_dist_pos>(N));
     for (int i = 0; i < NumImages; i++) {
 
       auto startMethod = chrono::high_resolution_clock::now();
@@ -142,17 +116,16 @@ int main(int argc, char * argv[]) {
       auto endMethod = chrono::high_resolution_clock::now();
       chrono::duration < double > durationMethod = endMethod - startMethod;
       for (int j = N - 1; j >= 0; j--) {
-        methodResult[j] = nn_pqueue.top();
+        graph[i][j] = nn_pqueue.top();
         nn_pqueue.pop();
       }
 
       for (int j = 0; j < N; j++) {
-        outfile << methodResult[j].pos << " ";
+        outfile << graph[i][j].pos << " ";
       }
       outfile << endl;
     }
   delete[] array;
   images.close();
-  delete[] methodResult;
-  return 0;
+  return graph;
 }
