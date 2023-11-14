@@ -71,6 +71,7 @@ int main(int argc, char * argv[]) {
   ImageSize = rows * columns;
 
   Node * array = new Node[NumImages+1];
+
   for (int i = 0; i < NumImages; i++) {
     images.read(array[i].image.data(), ImageSize);
   }
@@ -78,9 +79,14 @@ int main(int argc, char * argv[]) {
   mt19937 gen(rd());
   uniform_int_distribution<int> distribution(0, NumImages - 1);
   vector<vector<pair_dist_pos>> graph = create_graph(input,N);
+  pair_dist_pos * methodResult = new pair_dist_pos[GraphN];
+   pair_dist_pos * exhaustiveResult  = new pair_dist_pos[GraphN];
   bool repeat=false;
     do {
     repeat = false;
+    double totalMethodDuration = 0.0;
+    double totalExhaustiveDuration = 0.0;
+    double maf=-1;
     ifstream query(queryF);
     if (!query.is_open()) {
       cerr << "Failed to open query.dat" << endl;
@@ -107,49 +113,51 @@ int main(int argc, char * argv[]) {
         priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > nn_pqueue;
         for (int j=0; j < R;j++){
             int curr= distribution(gen);
-            for (int t=0;t<T; t++){
-                vector <pair_dist_pos> fromQuery (N);
+            for (int t=0;t<50; t++){
+                vector <pair_dist_pos> fromQuery (GraphN);
                 float distFromQuery= 9999999999;
                 int next;
                 for (int z=0; z<E; z++){
                     pair_dist_pos buff;
                     buff.pos=graph[curr][z].pos;
-                    buff.dist=euclidean_distance(array[buff.pos],queries[i]);
-                    if (buff.dist < distFromQuery){
-                        distFromQuery=buff.dist;
+                    buff.distance=euclidean_distance(array[buff.pos],queries[i]);
+                    if (buff.distance < distFromQuery){
+                        distFromQuery=buff.distance;
                         next=buff.pos;
                     }
-                    nn_pqueue.insert(buff);
+                    nn_pqueue.emplace(buff);
                 }
                 curr=next;
             }
         }
         auto endMethod = chrono::high_resolution_clock::now();
         chrono::duration < double > durationMethod = endMethod - startMethod;  
+        totalMethodDuration+= durationMethod.count();
         auto startExhaustive = chrono::high_resolution_clock::now();
-        distances = calculateDistances(array, query_pos);
+         priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, NumImages);
         auto endExhaustive = chrono::high_resolution_clock::now();
         chrono::duration < double > durationExhaustive = endExhaustive - startExhaustive;
-        double maf=-1;
-        for (int j = N - 1; j >= 0; j--) {
+        totalExhaustiveDuration+=durationExhaustive.count();
+        for (int j = GraphN - 1; j >= 0; j--) {
             exhaustiveResult[j] = distances.top();
             distances.pop();
             methodResult[j] = nn_pqueue.top();
             nn_pqueue.pop();
-            if ((methodResult[j].pos/exhaustiveResult[j].pos) > maf ){
-                maf=methodResult[j].pos/exhaustiveResult[j].pos;
+            if ((methodResult[j].distance/exhaustiveResult[j].distance) > maf ){
+                maf=methodResult[j].distance/exhaustiveResult[j].distance;
             }
       }  
       outfile <<"Query" << i <<endl;
-        for (int j = 0; j < N; j++) {
+        for (int j = 0; j < GraphN; j++) {
         outfile << "Nearest neighbor-" << j + 1 << " " << methodResult[j].pos << endl;
         outfile << "distanceApproximate:" << methodResult[j].distance << endl;
         outfile << "distanceTrue:" << exhaustiveResult[j].distance << endl;
       }
-      outfile << "tAverageApproximate:" << durationMethod.count() << endl;
-      outfile << "tAverageTrue:" << durationExhaustive.count() << endl;
-      outfile <<"MAF"<< maf << endl;
+
     }
+      outfile << "tAverageApproximate:" << (totalMethodDuration/queryImages) << endl;
+      outfile << "tAverageTrue:" << (totalExhaustiveDuration/queryImages) << endl;
+      outfile <<"MAF"<< maf << endl;
     cout << "Repeat with different query?[y/n]" << endl;
     string answer;
     cin >> answer;

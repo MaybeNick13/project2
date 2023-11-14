@@ -70,8 +70,10 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       tables[j] = hashtable(j, & array); //arxikopiisi ton hashtables
     }
     vector<vector<pair_dist_pos>> graph (NumImages,vector<pair_dist_pos>(N));
-    for (int i = 0; i < NumImages; i++) {
-        cout << "started " << i << "iteeration" <<endl;
+    for (int i = 41360; i < NumImages; i++) {
+      if (i % 10000==0){
+        cout <<"reached " << i <<endl;
+      }
       auto startMethod = chrono::high_resolution_clock::now();
       pair_dist_pos furthest;
       set < int > same_ids; ///gia pithanoun gitones
@@ -80,11 +82,9 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       set < int > rNeighbors;
       for (int j = 0; j < L; j++) {
         int query_id = array[i].IDS[j];
-        cout << "checking " << j <<"th hashtable of " << i <<endl;
         int bucket_num = query_id % (NumImages / 4);
 
         candidates = tables[j].get_bucket(bucket_num); //ikones sto idio bucket
-          cout << "second checking " << j <<"th hashtable of " << i <<endl;
         for (auto itr: candidates) {
           if (array[itr].IDS[j] == query_id) { //idio ID
             same_ids.insert(itr);
@@ -96,7 +96,6 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       for (auto itr: same_ids) {
 
         float dist = euclidean_distance(array[itr], array[i]); //diasxizoume ton pinaka me ta same_ids
-        cout << "iterating same_ids of" << i << endl;
         pair_dist_pos current {
           dist,
           itr
@@ -116,14 +115,15 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       }
       auto endMethod = chrono::high_resolution_clock::now();
       chrono::duration < double > durationMethod = endMethod - startMethod;
+
       for (int j = N - 1; j >= 0; j--) {
         graph[i][j] = nn_pqueue.top();
         nn_pqueue.pop();
       }
 
-      for (int j = 0; j < N; j++) {
-        outfile << graph[i][j].pos << " ";
-      }
+     // for (int j = 0; j < N; j++) {
+       // outfile << graph[i][j].pos << " ";
+      //}
       outfile << endl;
     }
   delete[] array;
