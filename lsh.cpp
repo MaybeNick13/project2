@@ -71,7 +71,7 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
     }
     vector<vector<pair_dist_pos>> graph (NumImages,vector<pair_dist_pos>(N));
     for (int i = 0; i < NumImages; i++) {
-
+        cout << "started " << i << "iteeration" <<endl;
       auto startMethod = chrono::high_resolution_clock::now();
       pair_dist_pos furthest;
       set < int > same_ids; ///gia pithanoun gitones
@@ -80,11 +80,11 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       set < int > rNeighbors;
       for (int j = 0; j < L; j++) {
         int query_id = array[i].IDS[j];
-
+        cout << "checking " << j <<"th hashtable of " << i <<endl;
         int bucket_num = query_id % (NumImages / 4);
 
         candidates = tables[j].get_bucket(bucket_num); //ikones sto idio bucket
-
+          cout << "second checking " << j <<"th hashtable of " << i <<endl;
         for (auto itr: candidates) {
           if (array[itr].IDS[j] == query_id) { //idio ID
             same_ids.insert(itr);
@@ -96,6 +96,7 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       for (auto itr: same_ids) {
 
         float dist = euclidean_distance(array[itr], array[i]); //diasxizoume ton pinaka me ta same_ids
+        cout << "iterating same_ids of" << i << endl;
         pair_dist_pos current {
           dist,
           itr
