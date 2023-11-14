@@ -17,6 +17,7 @@ hashfunc::hashfunc(Node* nodes) {
     length = sqrt(length);
 
     for (int i = 0; i < ImageSize; i++) {
+
         proj[i] = proj[i] / length; // kanonikopoihsh
     }
 
@@ -68,7 +69,7 @@ hashtable::hashtable(int num, Node** im) : images(im), id_num(num) {
     for (int i = 0; i < k; i++) {                   //ftiaxnei k hashfuncs kai apothikevi tis times tous
         hashfunc val(*images);
         hval[i] = val.get_values();
-        factors[i] = rand();
+        factors[i] = rand() % 41 - 20;
         hashfuncs.push_back(val);
     }
 
@@ -78,7 +79,7 @@ hashtable::hashtable(int num, Node** im) : images(im), id_num(num) {
 
     for (int i = 0; i < NumImages; i++) {
         for (int j = 0; j < k; j++) {
-            ID[i] += hval[j][i];
+            ID[i] += factors[j]*hval[j][i];
         }
         ID[i] = ID[i] % M;
         (*images)[i].IDS[id_num] = ID[i];

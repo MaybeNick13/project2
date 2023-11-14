@@ -59,6 +59,7 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
     (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
   ImageSize = rows * columns;
+  cout << NumImages <<endl;
   bool repeat;
   Node * array = new Node[NumImages];
   for (int i = 0; i < NumImages; i++) {
@@ -70,10 +71,8 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       tables[j] = hashtable(j, & array); //arxikopiisi ton hashtables
     }
     vector<vector<pair_dist_pos>> graph (NumImages,vector<pair_dist_pos>(N));
-    for (int i = 41360; i < NumImages; i++) {
-      if (i % 10000==0){
-        cout <<"reached " << i <<endl;
-      }
+    for (int i = 41350; i < NumImages; i++) {
+    
       auto startMethod = chrono::high_resolution_clock::now();
       pair_dist_pos furthest;
       set < int > same_ids; ///gia pithanoun gitones
@@ -121,9 +120,9 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
         nn_pqueue.pop();
       }
 
-     // for (int j = 0; j < N; j++) {
-       // outfile << graph[i][j].pos << " ";
-      //}
+     for (int j = 0; j < N; j++) {
+        outfile << graph[i][j].pos << " ";
+      }
       outfile << endl;
     }
   delete[] array;
