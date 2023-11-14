@@ -71,7 +71,7 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
       tables[j] = hashtable(j, & array); //arxikopiisi ton hashtables
     }
     vector<vector<pair_dist_pos>> graph (NumImages,vector<pair_dist_pos>(N));
-    for (int i = 41350; i < NumImages; i++) {
+    for (int i = 41359; i < NumImages; i++) {
     
       auto startMethod = chrono::high_resolution_clock::now();
       pair_dist_pos furthest;
