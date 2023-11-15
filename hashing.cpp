@@ -82,7 +82,6 @@ hashtable::hashtable(int num, Node** im) : images(im), id_num(num) {
             ID[i] +=factors[j] *hval[j][i];
         }
         ID[i] = ID[i] % M;
-        cout << ID[i] << " " << i<<endl;
         (*images)[i].IDS[id_num] = ID[i];
     }
 
