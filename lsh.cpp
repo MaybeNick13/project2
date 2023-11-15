@@ -72,9 +72,10 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
     }
     vector<vector<pair_dist_pos>> graph (NumImages,vector<pair_dist_pos>(N));
     for (int i = 0; i < NumImages; i++) {
-    if (i=41358)
-    continue;
-
+      if (i==41358){
+        cout <<"skipped 41358"<<endl;
+        continue;
+      }
       auto startMethod = chrono::high_resolution_clock::now();
       pair_dist_pos furthest;
       set < int > same_ids; ///gia pithanoun gitones
@@ -121,11 +122,10 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
         graph[i][j] = nn_pqueue.top();
         nn_pqueue.pop();
       }
-
-     //for (int j = 0; j < N; j++) {
-       // outfile << graph[i][j].pos << " ";
-      //}
-      //outfile << endl;
+    for (int j = 0; j < N; j++) {
+        outfile << graph[i][j].pos << " ";
+      }
+    outfile << endl;
     }
   delete[] array;
   images.close();
