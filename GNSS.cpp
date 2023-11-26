@@ -1,20 +1,8 @@
-#include "lsh.h"
-
-#include "utils.h"
-
-#include <iostream>
-
-#include <fstream>
-
-#include <vector>
-
-#include <random>
-
-#include <cstring>
-
+#include "GNSS.h"
 using namespace std;
 
-int main(int argc, char * argv[]) {
+int gnss(int argc, char * argv[]) {
+  srand((unsigned)time(NULL));
   string input = "input.dat";
   string queryF = "query.dat";
   string output = "graphRes.txt";
@@ -113,7 +101,7 @@ int main(int argc, char * argv[]) {
         priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > nn_pqueue;
         for (int j=0; j < R;j++){
             int curr= distribution(gen);
-            for (int t=0;t<50; t++){
+            for (int t=0;t<100; t++){
                 vector <pair_dist_pos> fromQuery (GraphN);
                 float distFromQuery= 9999999999;
                 int next;

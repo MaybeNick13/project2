@@ -1,37 +1,15 @@
-CLUSTER_FILES = $(hashing.o clustering.o cube.o utils.o)
-LSH_FILES = $(hashing.o lsh.o utils.o)
+CXX = g++
+CXXFLAGS = -std=c++11 -Wall -Wextra -pedantic
 
-all: cube lsh cluster GNSS
+SRCS = main.cpp GNSS.cpp lsh.cpp mrng.cpp utils.cpp hashing.cpp
+OBJS = $(SRCS:.cpp=.o)
+TARGET = main
 
-cube: hashing.o cube.o hypercube.o utils.o
-	g++ $^ -o $@ -g
+$(TARGET): $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
 
-lsh: $(LSH_FILES)
-	g++ $^ -o $@ -g
-
-cluster: hashing.o clustering.o hypercube.o cluster.o utils.o
-	g++ $^ -o $@ -g
-
-GNSS: hashing.o GNSS.o lsh.o utils.o
-	g++ $^ -o $@ -g
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -f cube lsh cluster GNSS *.o
-
-hashing.o : hashing.cpp
-	g++ -g -c $<
-
-clustering.o: clustering.cpp
-	g++ -g -c $<
-
-cluster.o: cluster.cpp
-	g++ -g -c $<
-
-hypercube.o: hypercube.cpp
-	g++ -g -c $<
-
-utils.o: utils.cpp
-	g++ -g -c $<
-
-main.o: main.cpp lsh.h utils.h
-	g++ -g -c $<
+	rm -f $(OBJS) $(TARGET)

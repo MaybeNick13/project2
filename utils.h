@@ -93,4 +93,17 @@ int get_num_from_line(string line, int del_pos);
 
 priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(Node* array, int query_pos);
 
+class MRNG_Node{
+    public:
+    std::vector<unsigned char> image;
+    MRNG_Node();
+};
+float euclidean_distance(const MRNG_Node &a, const MRNG_Node &b);
+
+float euclidean_distance(const MRNG_Node& a, const vector<float> &b);
+struct mapNode{
+    int id;
+    bool checked;
+};
+
 #endif

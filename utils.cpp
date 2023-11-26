@@ -12,8 +12,8 @@ using namespace std;
  int L = 5;
  int N = 50;
  int E=30;
- int R = 1;
- int GraphN = 1;
+ int R = 3;
+ int GraphN = 5;
  int NumImages;
  int ImageSize =784;
  unsigned long M= 4294967291;
@@ -218,4 +218,33 @@ int get_num_from_line(string line, int del_pos){
 
 	return atoi(anum);
 
+}
+
+float euclidean_distance(const MRNG_Node& a, const vector<float> &b) {
+    float result = 0.0;
+    float sum = 0.0, x;
+
+    for (int i = 0; i < ImageSize; i++) {
+        x = (unsigned char)a.image[i] - b[i];
+        sum += x * x;
+    }
+
+    result = sqrt(sum);
+    return result;
+}
+float euclidean_distance(const MRNG_Node& a, const MRNG_Node& b) {
+    float result = 0.0;
+    float sum = 0.0;
+    float x;
+
+    for (int i = 0; i < ImageSize; i++) {
+        x = (unsigned char)a.image[i] - (unsigned char)b.image[i];
+        sum += x * x;
+    }
+
+    result = sqrt(sum);
+    return result;
+}
+MRNG_Node::MRNG_Node(){
+    image = vector<unsigned char>(ImageSize);
 }
