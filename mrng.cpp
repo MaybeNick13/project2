@@ -1,4 +1,6 @@
 #include "mrng.h"
+#include <unistd.h>
+
 
 using namespace std;
 
@@ -33,7 +35,7 @@ float search_graph_MRNG :: get_dist(int point_a, int point_b){
 }
 
 void search_graph_MRNG :: resize_multimap(multimap<float, mapNode> starting_map, int size){
-    if(size >= starting_map.size()){
+    if(size >= (int)starting_map.size()){
         return;
     }
 
@@ -82,8 +84,6 @@ node_popullation(num_of_nodes), dimen(dimension), nodes(ns){
         
         adjacency_list[p].push_back(candidates.begin()->second);
         candidates.erase(candidates.begin()->first);
-
-        bool condition = true;
 
         for(auto n = candidates.begin(); n != candidates.end(); n++){
 
@@ -136,7 +136,6 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
     st_node.id = starting_node;
     S.insert({euclidean_distance(query, (*nodes)[starting_node]), st_node});
 
-    bool stop = false;
     while(true){
         int next_node = -1;
         for(auto &nd : S){
@@ -173,8 +172,8 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
 
 
 int mrng(int argc, char * argv[]){
-    int N = 5;
-    int l = 5; 
+    int N_mrng = 5;
+    int l_mrng = 5; 
     char* input_name, *query_name, *output_name;
     int dimensions, num_of_images;
     ifstream in_str, q_str;
@@ -221,11 +220,11 @@ int mrng(int argc, char * argv[]){
 
     N_str = get_str_of_option(argv, argv + argc, "-N");
     if(N_str)
-        N = atoi(N_str);
+        N_mrng = atoi(N_str);
 
     l_str = get_str_of_option(argv, argv + argc, "-l");
     if(l_str) 
-        l = atoi(l_str);
+        l_mrng = atoi(l_str);
     in_str.seekg(4);
     char buffer[4];
     in_str.read(buffer,4);
@@ -233,7 +232,7 @@ int mrng(int argc, char * argv[]){
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
-    num_of_images = 1000;
+    num_of_images = 100;
     int rows, columns;
     in_str.read(buffer,4);
     rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
@@ -256,7 +255,7 @@ int mrng(int argc, char * argv[]){
 		in_str.read((char*)(array[i].image.data()), dimensions);
 	}
     auto constructGraph = chrono::high_resolution_clock::now();
-    search_graph_MRNG graph(l, N, dimensions, num_of_images, &array);
+    search_graph_MRNG graph(l_mrng, N_mrng, dimensions, num_of_images, &array);
     auto constructGraphEnd = chrono::high_resolution_clock::now();
     chrono::duration < double > graphTime = constructGraphEnd - constructGraph;
     double seconds= graphTime.count();
@@ -296,28 +295,33 @@ int mrng(int argc, char * argv[]){
 		in_str.read((char*)(queries[i].image.data()), dimensions);
 	}
 
+    out_str << "MRNG results" << endl;
     for(int q = 0; q < 10; q++){
+        priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[q], N_mrng, num_of_images);
         vector<int> NNN;
         NNN = graph.search_on_graph(queries[q]);
-        out_str << "Query " << q << " N nearest neighbors:" << endl;
+        out_str << "Query :" << q << endl;
         int i = 1;
+
+        vector<pair_dist_pos> trueknn(N_mrng);
+
+        for(int j = 1; j <= N_mrng; j++){
+            trueknn[N_mrng-j] = distances.top();
+            distances.pop();
+        }
+
         for(auto itr : NNN){
-            out_str << "Neigbor " <<i << ": " << itr << ", distance :" << euclidean_distance(array[itr], queries[q]) << endl;
+            out_str << "Nearest Neigbor-" << i << ": " << itr << endl;
+            out_str << "distanceApproximate: " << euclidean_distance(array[itr], queries[q]) << endl;
+            out_str << "distanceTrue: " << trueknn[i - 1].distance << endl;
             i++;
         }
-        int min = 0;
-        float min_pos = euclidean_distance(queries[q], array[0]);
-        for(int i = 1; i < num_of_images; i++){
-            float dist = euclidean_distance(queries[q], array[i]);
-            if(dist < min_pos){
-                min = i;
-                min_pos = dist;
-            }
-        }
-        out_str << "Actuall NN: " << min_pos << " in position: " << min << endl;
     }
+    sleep(1);
     delete[] queries;
     delete[] array;
+
     return 0;
 }
+
 

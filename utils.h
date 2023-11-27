@@ -106,4 +106,6 @@ struct mapNode{
     bool checked;
 };
 
+priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(MRNG_Node* array, MRNG_Node query, int kNN, int num_of_img);
+
 #endif

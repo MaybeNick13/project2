@@ -248,3 +248,25 @@ float euclidean_distance(const MRNG_Node& a, const MRNG_Node& b) {
 MRNG_Node::MRNG_Node(){
     image = vector<unsigned char>(ImageSize);
 }
+
+priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> calculateDistances(MRNG_Node* array, MRNG_Node query, int kNN, int num_of_img){
+    priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > distances;
+    pair_dist_pos furthest;
+    for (int j = 0; j < num_of_img; j++) {
+        pair_dist_pos pair = {
+            euclidean_distance(array[j], query),
+            j
+        }; //xrisimopoioume to struct myPair, afti ti fora dinontas sti thesi tou key tin apostasi, gia kaliteri xrisi xorou
+        if (j < kNN) {
+            distances.push(pair);
+
+        } else {
+            furthest = distances.top();
+            if (pair.distance < furthest.distance) {
+            distances.pop();
+            distances.emplace(pair);
+            }
+        }
+    }
+    return distances;
+}
