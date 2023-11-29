@@ -11,8 +11,8 @@ using namespace std;
  int k = 4;
  int L = 5;
  int N = 50;
- int E=30;
- int R = 3;
+ int E=40;
+ int R = 4;
  int GraphN = 5;
  int NumImages;
  int ImageSize =784;
@@ -150,7 +150,6 @@ float euclidean_distance(const Node& a, const vector<float> &b) {
 }
 
 float sqr_euclidean_distance_points(const vector<char> &a, const vector<float> &b){
-    float result = 0.0;
     float sum = 0.0, x;
 
     for (int i = 0; i < ImageSize; i++) {

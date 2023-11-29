@@ -57,7 +57,6 @@ int gnss(int argc, char * argv[]) {
     (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
   ImageSize = rows * columns;
-
   Node * array = new Node[NumImages+1];
 
   for (int i = 0; i < NumImages; i++) {
@@ -101,7 +100,7 @@ int gnss(int argc, char * argv[]) {
         priority_queue < pair_dist_pos, vector < pair_dist_pos > , compare > nn_pqueue;
         for (int j=0; j < R;j++){
             int curr= distribution(gen);
-            for (int t=0;t<100; t++){
+            for (int t=0;t<50; t++){
                 vector <pair_dist_pos> fromQuery (GraphN);
                 float distFromQuery= 9999999999;
                 int next;

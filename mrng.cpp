@@ -1,6 +1,4 @@
 #include "mrng.h"
-#include <unistd.h>
-
 
 using namespace std;
 
@@ -64,7 +62,7 @@ node_popullation(num_of_nodes), dimen(dimension), nodes(ns){
     initialize_distances();     // Initializing distances first
     cout << endl << "initializing distances done" << endl;
     adjacency_list = vector<list<int>>(num_of_nodes);
-    vector<float> centroid(dimension);
+    vector<float> centroid(dimension, 0);
 
     for(int p = 0; p < node_popullation; p++){
         cout<< p << endl;
@@ -85,13 +83,13 @@ node_popullation(num_of_nodes), dimen(dimension), nodes(ns){
         adjacency_list[p].push_back(candidates.begin()->second);
         candidates.erase(candidates.begin()->first);
 
-        for(auto n = candidates.begin(); n != candidates.end(); n++){
+        for(auto r = candidates.begin(); r != candidates.end(); r++){
 
             bool condition = true;
 
             for(auto t = adjacency_list[p].begin(); t != adjacency_list[p].end(); t++){
 
-                if(get_dist(*t, p) > get_dist(*t, n->second) && get_dist(*t, p) > get_dist(n->second, p)){
+                if(get_dist(r->second, p) > get_dist(*t, r->second) && get_dist(r->second, p) > get_dist(*t, p)){
                     condition = false;
                     break;
                     // etsi opws exei graftei o algori9mos einai poly argo pali (n^2*d*neighbors) 
@@ -99,11 +97,21 @@ node_popullation(num_of_nodes), dimen(dimension), nodes(ns){
                 }
             }
             if(condition == true){
-                adjacency_list[p].push_back(n->second);
+                adjacency_list[p].push_back(r->second);
             }
 
         }
-
+        ofstream adj_list_file("adj_list.txt");
+        for(int p = 0; p < num_of_nodes; p++){
+            adj_list_file << "Node " << p << " Neighbours: ";
+            int count = 0;
+            for(auto itr : adjacency_list[p]){
+                adj_list_file << itr << ", ";
+                count++;
+            }
+            adj_list_file << endl;
+            adj_list_file << "Count of " << p << " :" << count << endl;
+        }
     }
 
 
@@ -135,8 +143,8 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
     st_node.checked = false;
     st_node.id = starting_node;
     S.insert({euclidean_distance(query, (*nodes)[starting_node]), st_node});
-
-    while(true){
+    int i = 0;
+    while(i < l_MRNG){
         int next_node = -1;
         for(auto &nd : S){
             if(nd.second.checked == false){
@@ -159,7 +167,10 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
         }
 
         resize_multimap(S, l_MRNG);
+        i++;
+        cout << i << "\t";
     }
+    cout << endl;
 
     auto it = S.begin();
     for(int i = 0; i < N_MRNG; i++){
@@ -172,8 +183,8 @@ vector<int> search_graph_MRNG :: search_on_graph(MRNG_Node query){
 
 
 int mrng(int argc, char * argv[]){
-    int N_mrng = 5;
-    int l_mrng = 5; 
+    int N_mrng = 15;
+    int l_mrng = 15; 
     char* input_name, *query_name, *output_name;
     int dimensions, num_of_images;
     ifstream in_str, q_str;
@@ -232,7 +243,7 @@ int mrng(int argc, char * argv[]){
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
     (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
-    num_of_images = 100;
+    num_of_images = 1000;
     int rows, columns;
     in_str.read(buffer,4);
     rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
@@ -263,64 +274,101 @@ int mrng(int argc, char * argv[]){
 
     cout << "SEARCH GRAPH DONE in " << seconds <<" seconds" << endl;
 
-    q_str.seekg(4);
-    char q_buffer[4];
-    q_str.read(q_buffer,4);
-    int num_of_queries, q_dimen;
-    num_of_queries = (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[0]))<< 24) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[1])) << 16) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[2])) << 8) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[3])) );
-    int q_rows, q_columns;
-    q_str.read(q_buffer,4);
-    q_rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
-    q_str.read(buffer,4);
-    q_columns = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
-    (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
+    bool repeat = false;
 
-    q_dimen = q_rows * q_columns;
-    if(q_dimen != dimensions){
-        cout << "Query dimensions not same as input data dimensions, program will now terminate" << endl;
-        exit(-3);
-    }
+    do{
+        double maf=-1;
+        repeat = false;
+        q_str.seekg(4);
+        char q_buffer[4];
+        q_str.read(q_buffer,4);
+        int num_of_queries, q_dimen;
+        num_of_queries = (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[0]))<< 24) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[1])) << 16) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[2])) << 8) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(q_buffer[3])) );
+        int q_rows, q_columns;
+        q_str.read(q_buffer,4);
+        q_rows = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
+        q_str.read(buffer,4);
+        q_columns = (static_cast<uint32_t>(static_cast<unsigned char>(buffer[0]))<< 24) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[1])) << 16) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[2])) << 8) |
+        (static_cast<uint32_t>(static_cast<unsigned char>(buffer[3])) );
 
-    MRNG_Node * queries = new MRNG_Node[num_of_queries];
-
-    for (int i = 0; i < num_of_queries - 1; i++) {
-		in_str.read((char*)(queries[i].image.data()), dimensions);
-	}
-
-    out_str << "MRNG results" << endl;
-    for(int q = 0; q < 10; q++){
-        priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[q], N_mrng, num_of_images);
-        vector<int> NNN;
-        NNN = graph.search_on_graph(queries[q]);
-        out_str << "Query :" << q << endl;
-        int i = 1;
-
-        vector<pair_dist_pos> trueknn(N_mrng);
-
-        for(int j = 1; j <= N_mrng; j++){
-            trueknn[N_mrng-j] = distances.top();
-            distances.pop();
+        q_dimen = q_rows * q_columns;
+        if(q_dimen != dimensions){
+            cout << "Query dimensions not same as input data dimensions, program will now terminate" << endl;
+            exit(-3);
         }
 
-        for(auto itr : NNN){
-            out_str << "Nearest Neigbor-" << i << ": " << itr << endl;
-            out_str << "distanceApproximate: " << euclidean_distance(array[itr], queries[q]) << endl;
-            out_str << "distanceTrue: " << trueknn[i - 1].distance << endl;
-            i++;
+        MRNG_Node * queries = new MRNG_Node[num_of_queries];
+
+        for (int i = 0; i < num_of_queries - 1; i++) {
+            in_str.read((char*)(queries[i].image.data()), dimensions);
         }
+
+        out_str << "MRNG results" << endl;
+        double avg_exhaustive_time = 0, avg_SearchOnGraph_time = 0;
+        num_of_queries = 10;
+        for(int q = 0; q < num_of_queries; q++){
+            auto exhaustiveSearchStart = chrono::high_resolution_clock::now();
+            priority_queue<pair_dist_pos, vector<pair_dist_pos>, compare> distances = calculateDistances(array, queries[q], N_mrng, num_of_images);
+            auto exhaustiveSearchEnd = chrono::high_resolution_clock::now();
+            chrono::duration <double> exhaustiveTime = exhaustiveSearchEnd - exhaustiveSearchStart;
+            avg_exhaustive_time += exhaustiveTime.count();
+            
+
+            vector<int> NNN;
+            auto searchOnGraph_Start = chrono::high_resolution_clock::now();
+            NNN = graph.search_on_graph(queries[q]);
+            auto searchOnGraph_End = chrono::high_resolution_clock::now();
+            chrono::duration <double> SearchOnGraphTime = searchOnGraph_End - searchOnGraph_Start;
+            avg_SearchOnGraph_time += SearchOnGraphTime.count();
+            out_str << "Query :" << q << endl;
+            int i = 1;
+
+            vector<pair_dist_pos> trueknn(N_mrng);
+
+            for(int j = 1; j <= N_mrng; j++){
+                trueknn[N_mrng-j] = distances.top();
+                distances.pop();
+                float dist= euclidean_distance(queries[q],array[NNN[N_mrng-j]]);
+                if ((dist/trueknn[N_mrng-j].distance) > maf)
+                maf=dist/trueknn[N_mrng-j].distance;
+
+            }
+
+            for(auto itr : NNN){
+                out_str << "Nearest Neigbor-" << i << ": " << itr << endl;
+                out_str << "distanceApproximate: " << euclidean_distance(array[itr], queries[q]) << endl;
+                out_str << "distanceTrue: " << trueknn[i - 1].distance << endl;
+                i++;
+            }
+        }
+        avg_SearchOnGraph_time = avg_SearchOnGraph_time / num_of_queries;
+        avg_exhaustive_time = avg_exhaustive_time / num_of_queries;
+        out_str << "tAverageSearchOnGraph: " << avg_SearchOnGraph_time << endl;
+        out_str << "tAverageTrue: " << avg_exhaustive_time << endl;
+        out_str << "MAF: " << maf <<endl;
+        delete[] queries;
+        cout << "Repeat with different query?[y/n]" << endl;
+
+        string answer;
+        cin >> answer;
+        if (answer.compare("y") == 0) {
+            cout << "Enter query file name" << endl;
+            cin >> answer;
+            repeat = true;
+            query_name=new char[answer.length()+1];
+            strcpy(query_name,answer.c_str());
+            q_str=ifstream(query_name);
     }
-    sleep(1);
-    delete[] queries;
+    }while (repeat == 1);
     delete[] array;
-
     return 0;
 }
 

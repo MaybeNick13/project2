@@ -59,7 +59,6 @@ vector<vector<pair_dist_pos>> create_graph(string input, int N) {
     (static_cast < uint32_t > (static_cast < unsigned char > (buffer[3])));
 
   ImageSize = rows * columns;
-  cout << NumImages <<endl;
   bool repeat;
   Node * array = new Node[NumImages];
   for (int i = 0; i < NumImages; i++) {
